@@ -6,14 +6,30 @@ from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
 
 
+"""
+Input:
+Output:
+"""
+
+
+
+
 
 ####################Image Load,Display,Save#########################
 def destroy():
+    '''
+    Destroy(close) all open image windows
+    '''
     cv2.destroyAllWindows()
 
-def display(image,title = 'Image', display_tim = 2500):
+def display(image,title = 'Image', display_time = 2500):
+    """
+    Input:Image , title to be displayed in the window and argument for waitKey
+    Output: None
+    """
+
     cv2.imshow(title,image)
-    cv2.waitKey(display_tim)
+    cv2.waitKey(display_time)
 
 
 
@@ -21,22 +37,33 @@ def display(image,title = 'Image', display_tim = 2500):
 
 ####################Image preprocessing oprations#####################
 
-def resize(image, hnew = 300, interpolation = cv2.INTER_AREA):
-    #Compute new width . Aspect ratio must be unchanged
-    hold = image.shape[0]
-    wold = image.shape[1]
-    aspect_ratio = wold*1./hold
-    wnew = int(hnew*aspect_ratio)
-    new_dim = (wnew,hnew)
+def resize(image, hnew = 300,  interpolation = cv2.INTER_AREA,fixed_shape= True):
+
+    '''
+    Input:  Image, The new height you wish to set, interpolation technique, fixed shape boolean to represent if you want
+    Output: Resized image
+    '''
+
+    #Compute new width . Aspect ratio must be unchanged. This is because we can ensure that the images are same size after masking.
+    if fixed_shape:
+        wnew = 200
+        new_dim = (wnew,hnew)
+        #print new_dim
     #Resize
-    return cv2.resize(image,new_dim,interpolation = cv2.INTER_AREA)
+        return cv2.resize(image,new_dim,interpolation = cv2.INTER_AREA)
 
-
+    else :
+        hold = image.shape[0]
+        wold = image.shape[1]
+        aspect_ratio = wold*1./hold
+        wnew = int(hnew*aspect_ratio)
+        new_dim = (wnew,hnew)
+        return cv2.resize(image,new_dim,interpolation = cv2.INTER_AREA)
 
 def convert_to_gray(image):
     '''
 
-    Input: image
+    Input: Image
     Output: Image converted to gray scale
     '''
 
@@ -48,14 +75,14 @@ def blur(grey_image, k=3 ):
     '''
 
     Input: gray image
-    Output: Image blurred by Gaussian methso
+    Output: Image blurred by Gaussian method
     '''
 
     return cv2.GaussianBlur(grey_image,(k,k),0)
 
 ########################Edge Detection and Thresholding
 
-def threshold(img_gray,k=7,C=4):
+def threshold(img_gray,k=7,C=4,plot = False):
 
     '''
 
@@ -64,21 +91,30 @@ def threshold(img_gray,k=7,C=4):
     Output: Image undergone adaptive threshold process
     '''
     t_image =  cv2.adaptiveThreshold(img_gray,255,cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY_INV,k,C)
-    features_threshold = pca(t_image)
-    return features_threshold.flatten()
+
+    if plot:
+        display(t_image,"Thresholded image")
+    #http://stackoverflow.com/questions/28930465/what-is-the-difference-between-/
+    #flatten-and-ravel-functions-in-numpy   :Ravel is faster , memoryless
+    features_threshold = t_image.ravel()
+    return features_threshold
 
 
-def cannyedgedetection(img_gray,t1=10,t2=180):
+def cannyedgedetection(img_gray,t1=10,t2=180,plot = False):
     '''
 
-    Input: gray image, t1 is lower threshold, upper threshold
+    Input: Gray image, t1 is lower threshold, upper threshold
     Output: Image undergone canny edge detection
     '''
     # CANNY EDGE DETECTION
 
-    image_ce = cv2.Canny(img_gray,t1,t2)
-    feature_edge = pca(image_ce)
-    return feature_edge.flatten()
+    ce_image = cv2.Canny(img_gray,t1,t2)
+
+    if plot:
+        display(ce_image,"Edged image")
+
+    features_edge = ce_image.ravel()
+    return features_edge
 
 
 
@@ -92,8 +128,12 @@ def masking(image,mask_type = 'c'):
 
     '''
 
-        Input: image(can be color or gray), type of masking(c for circular and r for rectangukar)
+        Input: Image(can be color or gray), type of masking(c for circular and r for rectangular)
         Output: Image undergone canny edge detection
+
+        For this project I have decided to go with cirular masks because they retain
+        more information about watch while removing the background noise
+        background
     '''
 
 
@@ -102,7 +142,7 @@ def masking(image,mask_type = 'c'):
     cy = image.shape[0]/2
 
     center = (cx,cy)
-    mask_canvas_maks = np.zeros(image.shape[:2],dtype = 'uint8')
+    mask_canvas = np.zeros(image.shape[:2],dtype = 'uint8')
     white  = (255,255,255)
 
     #Radius should be equal to the half the image width to get the dial
@@ -110,7 +150,7 @@ def masking(image,mask_type = 'c'):
 
 
     if mask_type == 'c':
-        radius  = image.shape[1]*2/3
+        radius  = image.shape[1]/2
         cv2.circle(mask_canvas,center,radius,white,-1)
         img_masked = bitwise_operations(image,mask_canvas)
     if mask_type == 'r':
@@ -122,8 +162,9 @@ def masking(image,mask_type = 'c'):
         end_pt =  (image.shape[1],cy + int(0.33*image.shape[0]))
         cv2.rectangle(mask_canvas,start_pt,end_pt,white,-1)
         img_masked = bitwise_operations(image,mask_canvas)
-
-    return img_masked,mask_canvas
+    #display(img_masked,"masked")
+    #Masked image can be returned if needed
+    return mask_canvas #,img_masked
 
 
 
@@ -135,9 +176,14 @@ def bitwise_operations(image,mask):
 #########################Dominant color####################
 
 
-
-
 def grey_hist_feat(img_gray,mask =None):
+    '''
+    Input: Gray image , mask if used
+
+    Output: features list obtain by flattening the histgram
+    '''
+
+
     #img_g = convert_to_gray(image)
 
     img_gb = blur(img_gray,3)
@@ -151,7 +197,14 @@ def grey_hist_feat(img_gray,mask =None):
     #featurize
     return hist.flatten()
 
+
 def col_hist_feat(image,mask = None,plot = False):
+    '''
+    Input: Image , mask if used, a boolean for whether to plot histogram or not
+
+    Output: features list obtain by flattening the histgram
+    '''
+    # Split the image matrix to 3 seperate matrices  of B,G,R channels each now in greyscale
     bgr = cv2.split(image)
     col = ['b','g','r']
     plt.figure()
@@ -163,101 +216,50 @@ def col_hist_feat(image,mask = None,plot = False):
     features = []
     for (chan, color) in zip(bgr, col):
         hist = cv2.calcHist([chan], [0], mask, [256], [0, 256])
-        print ">>>>>>>>%s>>>>>"%color,plot
+
         if plot:
-            print "me here",hist.shape
+            print "Color Histogram",hist.shape
             plt.xlim([0, 256])
             plt.plot(hist, color = color)
 
-        features.extend(hist)
-    plt.show()
+        #Flatten the matrix to a list
+        features.extend(hist.flatten())
+    if plot:
+        plt.show()# We leave it at the end coz in the for loop we'll get 3 plots for b,g,r
     return  features
 
-################################pCA
-def pca(img_gray,n_components = 100,plot = False):
-    #Since Standard scalar expects <=2 dimensions but colored images have 3 we will be
-    #convert them to gray if not gray already
+##########################################Preprocessing function
 
+def preprocess(image_path):
 
-    scale = StandardScaler()
-    img_scaled  =  scale.fit_transform(img_gray)
+        image = cv2.imread(image_path)
 
-    pca_model = PCA(n_components=100)
-    #features
-    pca_data = pca_model.fit_transform(img_scaled )
-    if plot:
-        scree_plot(pca_model)
-        plt.show()
-
-    variance_array = pca_model.explained_variance_ratio_
-    return pca_data
-
-
-
-############################# PCA helper
-def scree_plot(pca, title=None):
-    num_components = pca.n_components_
-    ind = np.arange(num_components)
-    vals = pca.explained_variance_ratio_
-    plt.figure(figsize=(10, 6), dpi=250)
-    ax = plt.subplot(111)
-    ax.bar(ind, vals, 0.35,
-           color=[(0.949, 0.718, 0.004),
-                  (0.898, 0.49, 0.016),
-                  (0.863, 0, 0.188),
-                  (0.694, 0, 0.345),
-                  (0.486, 0.216, 0.541),
-                  (0.204, 0.396, 0.667),
-                  (0.035, 0.635, 0.459),
-                  (0.486, 0.722, 0.329),
-                 ])
-
-    for i in xrange(num_components):
-        ax.annotate(r"%s%%" % ((str(vals[i]*100)[:4])), (ind[i]+0.2, vals[i]), va="bottom", ha="center", fontsize=12)
-
-    ax.set_xticklabels(ind,
-                       fontsize=12)
-
-    ax.set_ylim(0, max(vals)+0.05)
-    ax.set_xlim(0-0.45, 8+0.45)
-
-    ax.xaxis.set_tick_params(width=0)
-    ax.yaxis.set_tick_params(width=2, length=12)
-
-    ax.set_xlabel("Principal Component", fontsize=12)
-    ax.set_ylabel("Variance Explained (%)", fontsize=12)
-
-    if title is not None:
-        plt.title(title, fontsize=16)
-###################################
-def preprocess(image):
         resized_image = resize(image)
+
         gray_image = convert_to_gray(resized_image)
 
 
-
-        #get features
-        features = []
-
+        #display(resized_image, "rz")
         #Color
-        #mask_canvas_rect = masking(resized_image , 'r')
-        #mask_canvas = masking(resized_image , 'c')
-        #feature_color =
 
+        # mask_canvas = masking(resized_image , 'c')
+        # display(bitwise_operations(resized_image,mask_canvas))
+        # feature_color =col_hist_feat(resized_image, mask_canvas,True)
+        mask_canvas = masking(resized_image , 'c')
 
+        feature_color =col_hist_feat(resized_image,mask = mask_canvas,plot = False)
         #Edge
         feature_edge = cannyedgedetection(gray_image)
-
+        #print (feature_edge).shape, "no of edge features"
 
         #Thresholding
         feature_threshold =  threshold(gray_image)
+        #print (feature_threshold).shape ,"no of threshold features"
 
-
-
-        return features.extend(feature_color+feature_edge+feature_threshold)
-
-
-
+        #Combine features
+        features = np.concatenate((feature_edge , feature_threshold, feature_color),0)
+        #print len(features),"total features"
+        return features
 
 
 ##############################
@@ -268,19 +270,8 @@ def preprocess(image):
 ##############################
 ##############################
 if __name__ == "__main__":
-    #image = cv2.imread("/Users/Iskandar/Desktop/Project/testimages/9.jpg")#Circular
-    image = cv2.imread("/Users/Iskandar/Desktop/Project/testimages/459.jpg")#Rectangular
-    circ_mask,rect_mask, new_image = preprocess(image)
-
+    image_path = ("/Users/Iskandar/Desktop/WatchSeer/testimages/3.jpg")#Circular
+    #image = cv2.imread("/Users/Iskandar/Desktop/WatchSeer/testimages/32.jpg")#Rectangular
+    #print image.shape
     destroy()
-
-    display(new_image,"resized_image",2500)
-
-    display(circ_mask, "mask_circ",2500)
-    display(rect_mask, "mask_rect",2500)
-
-
-    features = col_hist_feat(imgc,rect_mask,True)
-
-    grey_hist_feat(image)
-    pca(image)
+    features = preprocess(image_path)
