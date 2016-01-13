@@ -6,6 +6,10 @@
 *.exe
 *.o
 *.so
+*.pyc
+.ipynb_checkpoints
+.gitignore.save
+
 
 # Packages #
 ############
@@ -36,7 +40,9 @@
 ehthumbs.db
 Thumbs.db
 
+
 # Data Folders #
 ######################
 Data/*
-testimages/* 
+testimages/*
+Data2/*

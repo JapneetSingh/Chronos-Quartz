@@ -57,8 +57,8 @@ def model(user_image, var_explained = False , data_paths = 'Data/'):
 
     model.fit(data_pca)
     test_data = data_pca[user_image,:]
-    if not test_data.shape[1]:
-        test_data.reshape(1,-1)
+    #if not test_data.shape[1]:
+    test_data.reshape(1,-1)
     #Predict K nearest neighbors for the given vector
     distances,predicted_indices = model.kneighbors(data_pca[user_image,:])
 
