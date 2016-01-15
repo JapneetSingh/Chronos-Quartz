@@ -46,3 +46,8 @@ Thumbs.db
 Data/*
 testimages/*
 Data2/*
+
+# Models #
+######################
+*.pkl
+*.json
