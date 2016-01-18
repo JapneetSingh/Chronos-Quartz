@@ -1,4 +1,4 @@
-# Chronos&Quartz: #### An reverse Image based search engine for watches 
+# Chronos&Quartz: #### An reverse Image based search engine for watches
 
 ### Motivation and Overview
 Reverse Image Search is a growing field which is largely expected to improve the way we search online
@@ -34,7 +34,7 @@ The results can be viewed on my app: .........................
 * __Web App__:<br\>
   A very basic version of webapp was created which uses the image url and any information you provide to recommend appropriate watches
 
-### Code and Reproducing Results
+### Code and Reproducing Results......................
 You will need to start by install OpenCV to your system. The following link should help
 http://stackoverflow.com/a/27650299
 
@@ -53,14 +53,14 @@ Just run Model.py from your computer. This will take care of  creating your data
 
 Metadata model can be created by running through the iPython notebook *Metadata_Model.ipynb*. Again this will create a pickle file for the desired models.
 
-
+..............................
 ### Tools and Packages used
 
 * BeautifulSoup and urllib for Webscraping
 * MongoDB, OS, JSON and PyMongo for storing scraped data
 * OpenCV, NumPy, Pandas, SciPy, NLTK, matplotlib and  Pint for EDA and featurization
 * scikit-learn for Modeling
-* AWS: S3 and EC2
+* AWS: S3 and EC2.................................
 
 
 ### Future Work:
@@ -78,9 +78,3 @@ Metadata model can be created by running through the iPython notebook *Metadata_
 3) https://github.com/nateberman/Python-WebImageScraper<br />
 4) http://goo.gl/EoAAFU<br />
 5) http://www.kevinjing.com/jing_pami.pdf<br/>
-
-
-###High level description of the project: what question or problem are you addressing?
-
-The idea is use image featurization to recommend cheap wrist watches based on luxury watches that a user wants but cant afford
-A web app would be used where user will enter an image of his choice and would get recommendations for similar looking watches
