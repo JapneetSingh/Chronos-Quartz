@@ -32,21 +32,14 @@ How can I see what you did? (Link to your live app!)
   Metadata model was used to supplement the result of the Image model. Any prediction that is made by both the models is shown first.  
   This is because metadata model picks based on only words. Since its an image based unsupervised learning problem no machine can match humans in evaluating the final results. Which is why I leave the decision in the users hands. The results seems to be doing a good job of detecting similar watches.
 
-* __Future Work:__<br />
-  Here are some other concepts and ideas I would like to use to add robustness to my model:<br />
-    1) KeyPoint Detection and Contouring<br />
-    2) Structural Similarity (SSIM) Index<br />
-    3) Neural Networks<br />
-
 ### Code and Reproducing Results
-You will need to install OpenCV to your system. The following link should help
+You will need to start by install OpenCV to your system. The following link should help
 http://stackoverflow.com/a/27650299
 
-#### Scraping
-The scraping code is in Image_Scraping.ipynb. Running the file once will download around 5000 images in the current working directory
-This process may take about an hour to two depending upon various factors.
+* __Scraping:__
+The scraping code is in Image_Scraping.ipynb. Running the file once will download around 5000 images in the current working directory. This process may take about an hour to two depending upon various factors.
 
-#### Image model
+* __Image model:__
 Code for the image model constitutes the 3 files: <br />
           * *Features.py*: Takes a single image and derives it features<br />
           * *Image_processing.py*: creates a NumPy array from all the images by calling features.py for each image<br />
@@ -54,18 +47,28 @@ Code for the image model constitutes the 3 files: <br />
 
 Just run Model.py from your computer. This will take care of  creating your dataset and training your model.It will also download pickled version of a number of important objects in your working directory. The process may take some time (~20 minutes) depending on your machine.
 
-#### Metadata Model
+* __Metadata Model:__
 
 Metadata model can be created by running through the iPython notebook *Metadata_Model.ipynb*. Again this will create a pickle file for the desired models.
-
 
 ### Tools and Packages used
 
 * BeautifulSoup and urllib for Webscraping
 * MongoDB, OS, JSON and PyMongo for storing scraped data
-* OpenCV, NumPy, SciPy, NLTK, matplotlib and  Pint for EDA and featurization
+* OpenCV, NumPy, Pandas, SciPy, NLTK, matplotlib and  Pint for EDA and featurization
 * scikit-learn for Modeling
 * AWS: S3 and EC2
+
+
+### Future Work:
+
+  Currently my model works under the assumption that the the image entered by user should be in the same format as images on amazon
+  i.e. with a white background and the watch placed upright.Here are some other concepts and ideas I would like to explore to add robustness to my model:<br />
+    1) KeyPoint Detection and Contouring<br />
+    2) Structural Similarity (SSIM) Index<br />
+    3) Neural Networks<br />
+
+
 
 ### References
 1) pyimagesearch.com <br />
