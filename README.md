@@ -1,10 +1,9 @@
 # Chronos&Quartz: An Image based watch recommender
 
-To be completed
 2. The README
 
 ### Motivation
-# How often do we come across cases when we get a brief glimpse of something in passing that we really love but don't have enough time to get information about it;  a dress, shoes or perhaps accessories that someone is wearing. We perhaps have just abut enough time to take an image
+#### How often do we come across cases when we get a brief glimpse of something in passing that we really love but don't have enough time to get information about it;  a dress, shoes or perhaps accessories that someone is wearing. We perhaps have just abut enough time to take an image
 
 ### Overview
 
@@ -15,28 +14,30 @@ What are your results?
 How can I see what you did? (Link to your live app!)
 
 An in-depth explanation of your process
-* Web Scraping:
+* __Web Scraping:__\n
   I started out by scraping over 5000 images and associated metadata from amazon using BeautifulSoup and urllib.
   The images were stored locally while the metadata was stored in MongoDB
 
-* Image Featurization and PCA:
+* __Image Featurization and PCA:__\n
  I used OpenCV 3.0 in python for my featurization. After multiple experiments with different techniques I decided to use Edge detection, Thresholding and color histograms to create my feature space. I had around 121,000 total features by the end of the process. The features from colors(around 1500) were dwarfed by the total features from other two techniques. To provide more weight to
   the color based features I handled them separately . Two PCA's were performed one on color space features and the other on Edge and
   threshold generated features. I captured 90 % variance for both the feature spaces and was finally left with 3625 features.
 
-* Metadata Featurization:
+* __Metadata Featurization:__\n
   Metadata constituted of product descriptions and product information table found on each product page. Numerical and categorical variables were handled separately. Multiple categorical variables had more than 100 unique values. They were combined to create 1 giant string and TFIDF was performed. The numerical variables were all in different units and were handles by a module Pint.  
 
 
-* Modeling and Evaluation:
+* __Modeling and Evaluation:__\n
   I treated this as a similarity problem and tried multiple difference units. I get my best results with Cosine distance metric for Image features and Jaccard distance for text
 
   Metadata model was used to supplement the result of the Image model. Any prediction that is made by both the models is shown first.  
-  This is because metadata model picks based on only words.
-  Since its an image based unsupervised problem no machine can match humans in evaluating the final results. Which is why I leave the decision in your hands.
+  This is because metadata model picks based on only words.Since its an image based unsupervised problem no machine can match humans in evaluating the final results. Which is why I leave the decision in the users hands. The results seems to be doing a good job of detecting similar watches.
 
-* Future Work  
-  1) There are other techniques like contouring and keypoint detection
+* __Future Work:__\n  
+  Here are some other concepts and ideas I would like to use to add robustness to my model:\n
+    1) Keypoint Detection and Contouring
+    2) Structural Similarity (SSIM) Index
+    3) Neural Networks
 
 ### Code and Reproducing Results
 #### Scraping
@@ -70,7 +71,7 @@ Examples
 
 * BeautifulSoup and urllib for Webscraping
 * MongoDB, OS, JSON and PyMongo for storing scraped data
-* OpenCV, NumPy, SciPy for featurization
+* OpenCV, NumPy, SciPy, Pint for featurization
 * scikit-learn for Modeling
 
 * AWS: S3 and EC2
@@ -97,20 +98,13 @@ Flask
 
 
 ### References
-1) pyimagesearch.com
-2) https://github.com/JapneetSingh/dimensionality-reduction
-3) https://github.com/nateberman/Python-WebImageScraper
-4) http://goo.gl/EoAAFU
-
-
-
-
+1) pyimagesearch.com \n
+2) https://github.com/JapneetSingh/dimensionality-reduction \n
+3) https://github.com/nateberman/Python-WebImageScraper\n
+4) http://goo.gl/EoAAFU\n
 
 
 ###High level description of the project: what question or problem are you addressing?
 
 The idea is use image featurization to recommend cheap wrist watches based on luxury watches that a user wants but cant afford
-
-###How are you presenting your work? (web app, visualization, presentation/slides, etc.)
-
 A web app would be used where user will enter an image of his choice and would get recommendations for similar looking watches
