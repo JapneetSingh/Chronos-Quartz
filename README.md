@@ -1,16 +1,13 @@
-# Chronos&Quartz:
-####An Image based watch recommender
+# Chronos&Quartz: #### An reverse Image based search engine for watches 
 
-### Motivation
-#### How often do we come across cases when we get a brief glimpse of something in passing that we really love but don't have enough time to get information about it;  a dress, shoes or perhaps accessories that someone is wearing. We perhaps have just abut enough time to take an image
-
-### Overview
-
-An overview of your project.
-What is the goal of your project?
+### Motivation and Overview
+Reverse Image Search is a growing field which is largely expected to improve the way we search online
+in the coming few years. Image-based features can either be used as an alternative or additional signals
+to improve the efficacy of search engines. The field is growing quickly with a number of companies jumping on
+the bandwagon.  I wanted to put my skills to test and develop my own version of reverse image search and chose wrist watches as test subjects.<br/>
 The goal of my project was to use a picture to find similar men's wrist watches on amazon.
-What are your results?
-How can I see what you did? (Link to your live app!)
+
+The results can be viewed on my app: .........................
 
 ### The Process
 
@@ -29,8 +26,13 @@ How can I see what you did? (Link to your live app!)
 * __Modeling and Evaluation:__<br />
   I treated this as a similarity problem and tried multiple difference units. I get my best results with *Cosine* metric for Image features and *Jaccard index* for text
 
-  Metadata model was used to supplement the result of the Image model. Any prediction that is made by both the models is shown first.  
-  This is because metadata model picks based on only words. Since its an image based unsupervised learning problem no machine can match humans in evaluating the final results. Which is why I leave the decision in the users hands. The results seems to be doing a good job of detecting similar watches.
+  Metadata model was used to supplement the result of the Image model. Image Model is used to make the baseline predictions. We then use predictions from metadata model change the order in which images are presented as recommendations. Any watch predicted by both the models is recommended first.  
+  This is because metadata model picks based on only words and does not account for patterns and shape within the .
+
+  Since its an image based unsupervised learning problem no machine can match humans in evaluating the final results. Which is why I leave the decision in the users hands. The results seems to be doing a good job of detecting similar watches.
+
+* __Web App__:<br\>
+  A very basic version of webapp was created which uses the image url and any information you provide to recommend appropriate watches
 
 ### Code and Reproducing Results
 You will need to start by install OpenCV to your system. The following link should help
@@ -51,6 +53,7 @@ Just run Model.py from your computer. This will take care of  creating your data
 
 Metadata model can be created by running through the iPython notebook *Metadata_Model.ipynb*. Again this will create a pickle file for the desired models.
 
+
 ### Tools and Packages used
 
 * BeautifulSoup and urllib for Webscraping
@@ -64,10 +67,9 @@ Metadata model can be created by running through the iPython notebook *Metadata_
 
   Currently my model works under the assumption that the the image entered by user should be in the same format as images on amazon
   i.e. with a white background and the watch placed upright.Here are some other concepts and ideas I would like to explore to add robustness to my model:<br />
-    1) KeyPoint Detection and Contouring<br />
+    1) SIFT (Scale-invariant feature transform) and SURF (Speeded-Up Robust Features) <br />
     2) Structural Similarity (SSIM) Index<br />
     3) Neural Networks<br />
-
 
 
 ### References
@@ -75,6 +77,7 @@ Metadata model can be created by running through the iPython notebook *Metadata_
 2) https://github.com/JapneetSingh/dimensionality-reduction <br />
 3) https://github.com/nateberman/Python-WebImageScraper<br />
 4) http://goo.gl/EoAAFU<br />
+5) http://www.kevinjing.com/jing_pami.pdf<br/>
 
 
 ###High level description of the project: what question or problem are you addressing?
