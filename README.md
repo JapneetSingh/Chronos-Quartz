@@ -1,4 +1,4 @@
-# Chronos&Quartz: #### An reverse Image based search engine for watches
+# Chronos&Quartz: A reverse Image search engine for watches
 
 ### Motivation and Overview
 Reverse Image Search is a growing field which is largely expected to improve the way we search online
