@@ -1,18 +1,19 @@
 from collections import Counter
-import os,sys
-from flask import Flask, request , render_template
-from Query_Image import query_image_pipeline,unpickle
+import os
+import sys
+from flask import Flask, request, render_template
+from Query_Image import query_image_pipeline, unpickle
 from Model import read_mongodump
 
 
 app = Flask(__name__)
 
 
-#Get the image metadat to be used to print results
+# Get the image metadat to be used to print results
 mongo_data = read_mongodump("images.json")
 
 
-#Image based models
+# Image based models
 
 pca_model = unpickle("pickled_models/Image/2Pca_Image_model.pkl")
 scale_model = unpickle("pickled_models/Image/2SS_model.pkl")
@@ -20,13 +21,7 @@ knn_model = unpickle("pickled_models/Image/2knn_model.pkl")
 image_index_dict = unpickle("pickled_models/Image/2Image_model_Index_dict.pkl")
 
 
-#Metadata based models
-
-
-
-
-
-
+# Metadata based models
 
 
 # Form page to submit text
@@ -78,17 +73,23 @@ def submission_page():
 
 
 # My word counter app
-@app.route('/watch_recommendations', methods=['POST','GET'] )
+@app.route('/watch_recommendations', methods=['POST', 'GET'])
 def watch_recos():
     image_path = str(request.form['url'])
-    results  = query_image_pipeline(image_path,mongo_data, scale_model, pca_model, knn_model, image_index_dict)
+    results = query_image_pipeline(
+        image_path,
+        mongo_data,
+        scale_model,
+        pca_model,
+        knn_model,
+        image_index_dict)
     links = []
     for r in results:
-    	links.append(r['prod_url'])
+        links.append(r['prod_url'])
 
     #text = str(request.form['desc'])
 
-    return render_template("results.html", page_links = links)
+    return render_template("results.html", page_links=links)
 
 
 if __name__ == '__main__':

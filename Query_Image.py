@@ -2,22 +2,21 @@ import numpy as np
 import os
 from urllib import urlretrieve
 import cPickle as pickle
-from featurize import preprocess,pickle_this
+from featurize import preprocess, pickle_this
 
 
 def unpickle(filename):
-	"""
-	Input: Takes in a pkl file
-	Output: Returns the pickled object
-	"""
+    """
+    Input: Takes in a pkl file
+    Output: Returns the pickled object
+    """
+
+    with open(filename, 'rb') as fid:
+        model_object = pickle.load(fid)
+    return model_object
 
 
-	with open(filename, 'rb') as fid:
-		model_object = pickle.load(fid)
-	return model_object
-
-
-def get_results(index_dict,prediction_indices,mongo_data):
+def get_results(index_dict, prediction_indices, mongo_data):
     '''
     Used the mappingin index dictioanry to get the correct image numbers. It then uses the Mongodb dump to
     get recommendations's amazon url and image
@@ -25,12 +24,12 @@ def get_results(index_dict,prediction_indices,mongo_data):
     Output: list of dictionaries containing image and prod links to recommended products
     '''
     results = []
-    #Prediction indices is an array of array with just one value inside
+    # Prediction indices is an array of array with just one value inside
     for ind in prediction_indices[0]:
-        #Get the original image number from index dictionary
+        # Get the original image number from index dictionary
         img_number = index_dict[ind]
-        #Now that we have the original image number we proceed with getting the desired metadata for them
-        #mongo_data id a defaultdict object -- a dictionary of dictionaries
+        # Now that we have the original image number we proceed with getting the desired metadata for them
+        # mongo_data id a defaultdict object -- a dictionary of dictionaries
         # We store every single output as dictionary
         recommend = {}
         recommend['prod_url'] = mongo_data[img_number]["prod_url"]
@@ -41,35 +40,49 @@ def get_results(index_dict,prediction_indices,mongo_data):
 
     return results
 
-def query_image_pipeline(image_url,mongo_data, scale_model, pca_model, knn_model, image_index_dict,\
- 				k = 10, filename="Query_picture.jpg"):
-	"""
-	Input: The url of the image provided by the user , the filename to store image as , no of predictions to be returned
-	Output:
 
-	"""
-	#Save the image onto the system in the current working directory
-	urlretrieve(image_url,filename)
+def query_image_pipeline(
+        image_url,
+        mongo_data,
+        scale_model,
+        pca_model,
+        knn_model,
+        image_index_dict,
+        k=10,
+        filename="Query_picture.jpg"):
+    """
+    Input: The url of the image provided by the user , the filename to store image as , no of predictions to be returned
+    Output:
 
-	# get the image features using the preprocess function from
-	features = preprocess(filename)
-	print "Features here:??????????????", features.shape	
-	#Get the PCA model and Index dictionary from pkl file which should be in the same folder as this
+    """
+    # Save the image onto the system in the current working directory
+    urlretrieve(image_url, filename)
 
-	scaled_data =  scale_model.transform(features)
-	test_data = pca_model.transform(scaled_data)
-	#Its currently arow vector. We convert it to a matrix of order 1 row*121000 columns
-	test_data = test_data.reshape(1,-1)
+    # get the image features using the preprocess function from
+    features = preprocess(filename)
+    print "Features here:??????????????", features.shape
+    # Get the PCA model and Index dictionary from pkl file which should be in
+    # the same folder as this
 
-	#Getting predictions and results
+    scaled_data = scale_model.transform(features)
+    test_data = pca_model.transform(scaled_data)
+    # Its currently arow vector. We convert it to a matrix of order 1
+    # row*121000 columns
+    test_data = test_data.reshape(1, -1)
 
-	predicted_indices = knn_model.kneighbors(test_data, n_neighbors = k ,return_distance=False)
-	recommendations = get_results(image_index_dict,predicted_indices,mongo_data)
+    # Getting predictions and results
 
-	#recommendations here is a list of dictionaries for each recommendation dictionary
+    predicted_indices = knn_model.kneighbors(
+        test_data, n_neighbors=k, return_distance=False)
+    recommendations = get_results(
+        image_index_dict,
+        predicted_indices,
+        mongo_data)
 
-	return recommendations
+    # recommendations here is a list of dictionaries for each recommendation
+    # dictionary
 
+    return recommendations
 
 
 '''
@@ -178,10 +191,11 @@ if __name__ = "__main__":
 
 if __name__ == "__main__":
 
-	image_path = 'http://ecx.images-amazon.com/images/I/91KfW521riL._UL1500_.jpg'# "http://ecx.images-amazon.com/images/I/91LfiWuBpKL._UL1500_.jpg"
-	results  = query_image_pipeline(image_path)
-	links = []
-	for r in results:
-		links.append(r['prod_url'])
+    # "http://ecx.images-amazon.com/images/I/91LfiWuBpKL._UL1500_.jpg"
+    image_path = 'http://ecx.images-amazon.com/images/I/91KfW521riL._UL1500_.jpg'
+    results = query_image_pipeline(image_path)
+    links = []
+    for r in results:
+        links.append(r['prod_url'])
 
-	print links
+    print links
