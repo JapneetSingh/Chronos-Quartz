@@ -1,83 +1,56 @@
 import numpy as np
 import cv2
 import os
-from featurize import preprocess, display, destroy
+import sys
+from featurize import preprocess, display, destroy,pickle_this
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
+import cPickle as pickle
 #import matplotlib.pyplot as plt
-
-
-def vectorize(data_path,no_of_images,indicator = 20):
-	'''
-	Takes the path, total number of folders in path and creates vector matrix
-
-	'''
-	feature_matrix = []
-	#Since some of the images may not be loaded(dont exist or other errors) we
-	#start a dictionary to keep track of ehich ones do and which ones dont
-	index_dict = {}
-	#dict_counter keeps a count of number of images successfully loaded
-	dict_counter = 0
-
-	for i in xrange(no_of_images):
-		image_name = data_path + "{0}/{1}.jpg".format(i,i)
-		#print image_name
-		if os.path.exists(image_name):
-
-			#os.chdir("{0}").format(i)
-			#image_name ="{0}.jpg".format()
-
-			features = preprocess(image_name)
-			#print features
-			feature_matrix.append(features)
-			index_dict[dict_counter] = i
-			dict_counter += 1
-		else:
-			#index_dict[i] = "Load Error:No image"
-			pass
-
-		if i %	indicator == 0 :
-			print "%d images finished"%i
-
-	data_mat =  np.array(feature_matrix)
-	return data_mat , index_dict
 
 ################################pCA
 
-def pca(data,n_components = 100,plot = False):
-    '''
-    Since Standard scalar expects <=2 dimensions but colored images have 3 we will be
-    convert them to gray if not gray already
+def pca(data,n_components = 100,filename = "pca_image.pkl",plot = False,mayipickle = False):
+	'''
+	Since Standard scalar expects <=2 dimensions but colored images have 3 we will be
+	convert them to gray if not gray already
 
+	Input: Gray image, number of components you wish to use, plot boolean to do the scree plot
 
-    Input: Gray image, number of components you wish to use, plot boolean to do the scree plot
+	Output: Features from image
 
-    Output: Features from image
-
-    '''
-    #Since standard scalar works with floats we change dtype here.
-    #Else we get a warning
+	'''
+	#Since standard scalar works with floats we change dtype here.
+	#Else we get a warning
 
 	#data = data.astype("float32")
 
-    scale = StandardScaler()
-    img_data_scaled  =  scale.fit_transform(data)
-    #print ">>>>>>>>>>>before>>>>>>", img_scaled.shape
+	scale = StandardScaler()
+	img_data_scaled  =  scale.fit_transform(data)
+	print ">>>>>>>>>>>before>>>>>>", img_data_scaled.shape
+	#Chunk used for pickling 
+	if mayipickle:
+		pickle_this(scale,"1StdScalerModel.pkl")
+		print "Std Scaler ready"
+		#sys.exit("Success")
 
-    #features
-    pca_model = PCA(n_components)
-    pca_data = pca_model.fit_transform(img_data_scaled)
-    #print ">>>>>>>>>>>>>after>>>>>>>", pca_data.shape
-    if plot:
-        # PLot to see how much variance does each principal component explain
-        scree_plot(pca_model)
-        plt.show()
+	pca_model = PCA(n_components)
+	pca_data = pca_model.fit_transform(img_data_scaled)
 
-    variance_array = pca_model.explained_variance_ratio_
-    return pca_data, variance_array
+	if mayipickle:
+		pickle_this(pca_model,filename)
+
+	#print ">>>>>>>>>>>>>after>>>>>>>", pca_data.shape
+	if plot:
+	    # PLot to see how much variance does each principal component explain
+	    scree_plot(pca_model)
+	    plt.show()
+
+	variance_array = pca_model.explained_variance_ratio_
+	return pca_data, variance_array
 
 
-############################# PCA helper
+############################# PCA helper- Not used currently ##################################
 def scree_plot(pca, title=None):
 
     '''
@@ -122,12 +95,80 @@ def scree_plot(pca, title=None):
 
     if title is not None:
         plt.title(title, fontsize=16)
+
+###########################Pipeline##################
+
+def data_pca_pipeline(data):
+	"""
+	Create the final dataset to be modeled. Run Pca on them and then combine them
+	Input : Feature datasets of same number of rows.
+	Output : Concatenated feature matrix
+	"""
+	print "Starting PCA"
+	data_pca, var_exp = pca(data,3500,'Pca_Image_model.pkl2',mayipickle = True)
+	print "Cumulative sum of Variance explained per component is as follows:", var_exp.cumsum()
+	print data
+
+	return data_pca
+
+######################Vectorize function##############
+
+def vectorize(data_path,no_of_images,indicator):
+	'''
+	Takes the path, total number of folders(not images coz folders may be empty) in path and creates vector matrix
+	Input: Path to files, Total Images, print step(how many images till notification)
+	Output: Final dataset to be used in modeling after PCA ,Index dictionary
+	'''
+
+	#Since some of the images may not be loaded(dont exist or other errors) we
+	#start a dictionary to keep track of which ones do and which ones dont
+	index_dict = {}
+	#dict_counter keeps a count of number of images successfully loaded
+	dict_counter = 0
+
+	predata = []
+
+	for i in xrange(no_of_images):
+		image_name = data_path + "{0}/{0}.jpg".format(i)
+
+		if os.path.exists(image_name):
+			#Get features
+			features = preprocess(image_name)
+
+			# Forming three matrices from all the images. these will be combined later
+			predata.append(features)
+
+			index_dict[dict_counter] = i
+			dict_counter += 1
+		else:
+			#index_dict[i] = "Load Error:No image"
+			pass
+
+		if i %	indicator == 0 :
+			print "%d images finished"%i
+
+	#Convert the two lists to np arrays
+	data =  np.array(predata)
+	print data
+	print">>>>>>>>>>>>>>",data.shape
+
+	pickle_this(data,"Final_Feature_Matrix_For_PCA.pkl")
+	pickle_this(index_dict,"Image_model_Index_dict.pkl")
+
+	#Perform PCA
+	data = data_pca_pipeline(data)
+
+	return data, index_dict
+
+
 ###################################
 
 
 
 if __name__ == "__main__":
+
 	data_path = 'Data/'
-	data, index = vectorize(data_path,5516,20)
-	data_new = data[:4000,:]
-	data_pca , var = pca(data_new,800)
+
+	data_color,data_thed,index_dict = vectorize(data_path,5940,250)
+
+	data = data_pipeline(data_color,data_thed)

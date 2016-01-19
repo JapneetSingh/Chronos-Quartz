@@ -1,72 +1,100 @@
 import numpy as np
 from sklearn.neighbors import NearestNeighbors
 from Image_processing import vectorize, pca
-from pymongo import MongoClient
+from featurize import pickle_this
+import cPickle as pickle
+import json
+from collections import defaultdict
+
+def read_mongodump(path_to_mongodump):
+    """/Users/Iskandar/Desktop/Chronos-Quartz/Model.py
+    Takes in mongo data as a list of dictionaries. Returns one dictionary that has where img numbers are keys and their
+    metadata dictionary is stored as values
+
+    Input: Path to Mongodump
+    Output: Returns a dictionary created from the dump
+    """
+    mongo_dict = []
+    with open(path_to_mongodump) as f:
+        for line in f:
+                mongo_dict.append(json.loads(line))
+
+    #mongo_data is now a list of dictionaries
+    mongo_data = defaultdict(dict)
+    for d in mongo_dict:
+        img_no = d['img_no']
+        mongo_data[img_no] = d
+
+    return mongo_data
 
 
 #Index Dictionary maintains the mapping of images in the hardisk and their number in the data matrix
 # The numbers ideally should be same but since some of the images cant be loaded there ends up being a mismatch
 #between the two. Once we have the predicted indices based on model we can use them to get the real indices on hard disk
-#which is the referene number also used in Mongodb
-def get_results(index_dict,prediction_indices,test):
+#which is the referene number also used in Mongodb dump called mongo_data here
+def get_results(index_dict,prediction_indices,mongo_data):
     '''
-    Input: Index dictionary , Prediction indices recommended
-    Output: list of links to recommended products
+    Used the mappingin index dictioanry to get the correct image numbers. It then uses the Mongodb dump to
+    get recommendations's amazon url and image
+    Input: Index dictionary , Prediction indices recommended, and mongo dump as dictionary
+    Output: list of dictionaries containing image and prod links to recommended products
     '''
-    client = MongoClient()
-    db = client.images  #db
-    source_data = db.image_data #image
-
-    x = source_data.find({'img_no' : test})
-    x.rewind()
-
-
     results = []
-    for ind in prediction_indices:
+    #Prediction indices is an array of array with just one value inside
+    for ind in prediction_indices[0]:
+        #Get the original image number from index dictionary
         img_number = index_dict[ind]
-        data =source_data.find({'img_no':img_number})
-        data.rewind()
-        results.append(str(data[0]['prod_url']))
+        #Now that we have the original image number we proceed with getting the desired metadata for them
+        #mongo_data id a defaultdict object -- a dictionary of dictionaries
+        # We store every single output as dictionary
+        recommend = {}
+        recommend['prod_url'] = mongo_data[img_number]["prod_url"]
+        recommend['reco_image_url'] = mongo_data[img_number]["img_url"]
+        recommend['pred_index'] = ind
+        recommend['original_img_no'] = img_number
+        results.append(recommend)
+
     return results
 
-
-# User image will become a link in the next iteration. Number for now
-
-def model(user_image, var_explained = False , data_paths = 'Data/'):
+def model( data ,test_image_vector,distance_metric = "cosine"):
 
     '''
-    #perform pca for the data
+    Perform Modeling on data by sending the image through the pipeline
+    Input: final data , index dictionary,distanc metric to be used
+    Output:
     '''
-
-    # we get data from reading the images
-    data,index_dict = vectorize(data_paths,5516,25)
-
-    #Keeping only 4000 becasue PCA is breaking for bigger numbers
-    data_new = data[:4000,:]
-
-    '''
-    #perform pca for the data
-    '''
-    data_pca,variance_per_component = pca(data_new,800)
-
-    if var_explained:
-        print "Cumulative sum of Variance per component is as follows:" , variance_per_component.cumsum()
-
-
-    model =  NearestNeighbors(n_neighbors = 10)
-
-    model.fit(data_pca)
-    test_data = data_pca[user_image,:]
-    #if not test_data.shape[1]:
-    test_data.reshape(1,-1)
+    model =  NearestNeighbors(n_neighbors = 10, metric = 'cosine',algorithm='brute')
+    model.fit(data)
+    pickle_this(model,"KNN_image.pkl")
     #Predict K nearest neighbors for the given vector
-    distances,predicted_indices = model.kneighbors(data_pca[user_image,:])
+    predicted_indices = model.kneighbors(test_image_vector, return_distance=False)
+    return predicted_indices
 
-    recommended_watches = get_results(index_dict,predicted_indices,user_image)
+def analysis_pipeline(test_image, mongopath = "images.json",data_paths = 'Data/'):
+    """
+    Analysis pipeline is the key function.
+    It get the test image vector and uses it to perform the entire process together
 
-    print recommended_watches
+    """
+    # we get data from reading the images: vectorize(data_path,no_of_images,indicator = 20)
+    print "Getting data and Index"
+    data,index_dict = vectorize(data_paths,5940,300)
+
+    #For now we're using an image from the dataset to test against. But test vector will be provided by user
+    #Reshape is needed to ensure its a matrix and not just a row vector
+
+    test_image_vector =  data[test_image,:].reshape(1,-1)
+    print "Modeling time!!"
+
+    predicted_indices = model(data,test_image_vector)
+    mongo_data = read_mongodump(mongopath)
+
+    print "Getting results"
+    recommendations = get_results(index_dict,predicted_indices,mongo_data)
+    return recommendations
 
 if __name__ == "__main__":
 
-
-    model(3976,True)
+    test_image_number = 389
+    recommendations = analysis_pipeline(test_image_number)
+    print recommendations

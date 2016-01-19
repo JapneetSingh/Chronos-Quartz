@@ -45,8 +45,11 @@ Thumbs.db
 ######################
 Data/*
 testimages/*
-Data2/*
 Models/*
+pickled_models/*
+Model1/*
+Model2/*
+Metadata Model pkl objects/*
 
 # Models #
 ######################

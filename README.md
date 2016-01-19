@@ -2,9 +2,8 @@
 
 ### Motivation and Overview
 Reverse Image Search is a growing field which is largely expected to improve the way we search online
-in the coming few years. Image-based features can either be used as an alternative or additional signals
-to improve the efficacy of search engines. The field is growing quickly with a number of companies jumping on
-the bandwagon.  I wanted to put my skills to test and develop my own version of reverse image search and chose wrist watches as test subjects.<br/>
+in the coming years. Image-based features can either be used as an alternative or additional signals
+to improve the efficacy of search engines. Chronos&Quartz is my  reverse image search engine for watches.
 The goal of my project was to use a picture to find similar men's wrist watches on amazon.
 
 The results can be viewed on my app: .........................
