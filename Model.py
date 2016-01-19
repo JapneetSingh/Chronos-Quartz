@@ -7,7 +7,7 @@ import json
 from collections import defaultdict
 
 def read_mongodump(path_to_mongodump):
-    """/Users/Iskandar/Desktop/Chronos-Quartz/Model.py
+    """
     Takes in mongo data as a list of dictionaries. Returns one dictionary that has where img numbers are keys and their
     metadata dictionary is stored as values
 
@@ -65,7 +65,7 @@ def model( data ,test_image_vector,distance_metric = "cosine"):
     '''
     model =  NearestNeighbors(n_neighbors = 10, metric = 'cosine',algorithm='brute')
     model.fit(data)
-    pickle_this(model,"KNN_image.pkl")
+    pickle_this(model,"2knn_model.pkl")
     #Predict K nearest neighbors for the given vector
     predicted_indices = model.kneighbors(test_image_vector, return_distance=False)
     return predicted_indices

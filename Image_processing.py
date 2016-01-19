@@ -1,7 +1,6 @@
 import numpy as np
 import cv2
 import os
-import sys
 from featurize import preprocess, display, destroy,pickle_this
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
@@ -10,7 +9,7 @@ import cPickle as pickle
 
 ################################pCA
 
-def pca(data,n_components = 100,filename = "pca_image.pkl",plot = False,mayipickle = False):
+def pca(data,n_components = 100,filename = "pca_image_model.pkl",plot = False,mayipickle = False):
 	'''
 	Since Standard scalar expects <=2 dimensions but colored images have 3 we will be
 	convert them to gray if not gray already
@@ -23,17 +22,14 @@ def pca(data,n_components = 100,filename = "pca_image.pkl",plot = False,mayipick
 	#Since standard scalar works with floats we change dtype here.
 	#Else we get a warning
 
-	#data = data.astype("float32")
+	data = data.astype("float64")
 
 	scale = StandardScaler()
 	img_data_scaled  =  scale.fit_transform(data)
-	print ">>>>>>>>>>>before>>>>>>", img_data_scaled.shape
-	#Chunk used for pickling 
-	if mayipickle:
-		pickle_this(scale,"1StdScalerModel.pkl")
-		print "Std Scaler ready"
-		#sys.exit("Success")
+	print ">>>>>>>>>>>before pca scaled>>>>>>", img_data_scaled
+	pickle_this(scale , "SS_model.pkl")
 
+	#features
 	pca_model = PCA(n_components)
 	pca_data = pca_model.fit_transform(img_data_scaled)
 
@@ -104,12 +100,12 @@ def data_pca_pipeline(data):
 	Input : Feature datasets of same number of rows.
 	Output : Concatenated feature matrix
 	"""
-	print "Starting PCA"
-	data_pca, var_exp = pca(data,3500,'Pca_Image_model.pkl2',mayipickle = True)
+	print "Starting PCA for edge and threshold"
+	data, var_exp = pca(data,3500,'Pca_Image_model.pkl',mayipickle = True)
 	print "Cumulative sum of Variance explained per component is as follows:", var_exp.cumsum()
 	print data
 
-	return data_pca
+	return data
 
 ######################Vectorize function##############
 

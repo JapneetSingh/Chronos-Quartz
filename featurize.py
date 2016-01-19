@@ -161,7 +161,7 @@ def masking(image,mask_type = 'c'):
 
     #used for dial color features
     if mask_type == 'c':
-        radius  = image.shape[1]*2/3
+        radius  = image.shape[1]/2
         cv2.circle(mask_canvas,center,radius,white,-1)
         img_masked = bitwise_operations(image,mask_canvas)
 
@@ -274,8 +274,15 @@ def preprocess(image_path):
         #resized_image = convert_to_hsv(resized_image)
 
         #Get the color features for the dial
-        mask = masking(resized_image , 'c')
-        feature_color =col_hist_feat(resized_image,mask = mask,plot = False)
+        mask_canvas_dial = masking(resized_image , 'c')
+        feature_color_dial =col_hist_feat(resized_image,mask = mask_canvas_dial,plot = False)
+
+        #Get the color features for the bands and part of dial(across the length of the watch)
+        mask_canvas_band = masking(resized_image , 'r')
+        feature_color_band =col_hist_feat(resized_image,mask = mask_canvas_band,plot = False)
+
+        #Combine the two color features to make one
+        feature_color = np.concatenate((feature_color_band,feature_color_dial),0)
 
         #Edge and thresholding
         gray_image = convert_to_gray(resized_image)

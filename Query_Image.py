@@ -53,7 +53,7 @@ def query_image_pipeline(image_url,mongo_data, scale_model, pca_model, knn_model
 
 	# get the image features using the preprocess function from
 	features = preprocess(filename)
-
+	print "Features here:??????????????", features.shape	
 	#Get the PCA model and Index dictionary from pkl file which should be in the same folder as this
 
 	scaled_data =  scale_model.transform(features)
