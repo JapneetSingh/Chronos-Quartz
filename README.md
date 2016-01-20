@@ -1,4 +1,5 @@
-# Chronos&Quartz: A reverse Image search engine for watches
+# Chronos&Quartz:<br/>
+# A reverse image search engine for watches
 
 ### Motivation and Overview
 Reverse Image Search is a growing field which is largely expected to improve the way we search online
@@ -26,9 +27,9 @@ The results can be viewed on my app: 54.174.217.236:8080
   Since its an image based unsupervised learning problem no machine can match humans in evaluating the final results. Which is why I leave the decision in the users hands. The results seems to be doing a good job of detecting similar watches.
 
 * __Web App__:<br\>
-  A very basic version of webapp was created which uses the image url recommend appropriate watches.
+  A web app was created which uses the image url recommend appropriate watches.
 
-### Code and Reproducing Results......................
+### Code and Reproducing Results
 You will need to start by install OpenCV to your system. The following link should help
 http://stackoverflow.com/a/27650299
 
@@ -70,13 +71,11 @@ Just run Model.py from your working directory. This will take care of  creating 
   The pickled models generated should be also in the same directory <br/>
 
 
-
-
 ### Tools and Packages used
 
 * BeautifulSoup and urllib for Webscraping
 * MongoDB, OS, JSON and PyMongo for storing scraped data
-* OpenCV, NumPy, Pandas, SciPy, and  matplotlib for EDA and featurization
+* OpenCV, NumPy, Pandas, SciPy, and  matplotlib for EDA and image featurization
 * scikit-learn for Modeling and PCA
 * Flask and AWS: S3 and EC2 for creating and hostingWeb app
 
