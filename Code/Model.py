@@ -38,7 +38,7 @@ def read_mongodump(path_to_mongodump):
 # dump called mongo_data here
 def get_results(index_dict, prediction_indices, mongo_data):
     '''
-    Used the mappingin index dictioanry to get the correct image numbers.
+    Used the mapping in index dictioanry to get the correct image numbers.
     It then uses the Mongodb dump to get recommendations's amazon url and image
 
     Input: Index dictionary , Prediction indices recommended, and mongo dump as dictionary
@@ -62,12 +62,16 @@ def get_results(index_dict, prediction_indices, mongo_data):
 
     return results
 
+# The following two functions are only used while training the data.
 
 def model(data, test_image_vector, distance_metric="cosine"):
     '''
-    Perform Modeling on data by sending the image through the pipeline
-    Input: final data , index dictionary,distanc metric to be used
-    Output:
+    Perform Modeling on data by sending the image through the pipeline. The test vector
+    is a random vector used to verify if code is functioning. Its value is assigned at the
+    bottom of this file
+
+    Input: final data , test vector to get results ,distanc metric to be used
+    Output: predicted values for test vector
     '''
     model = NearestNeighbors(
         n_neighbors=10,
@@ -83,9 +87,11 @@ def model(data, test_image_vector, distance_metric="cosine"):
 
 def analysis_pipeline(test_image, mongopath="images.json", data_paths='Data/'):
     """
-    Analysis pipeline is the key function.
-    It get the test image vector and uses it to perform the entire process together
+    Analysis pipeline is the key function that drives the full process.
+    It get the test image vector and uses it to perform the entire process together.
 
+    Input: test vector to be used, path to mongodump and path to images
+    Output: A dictionary containing the final recommendations
     """
     # we get data from reading the images:
     # vectorize(data_path,no_of_images,indicator = 20)
