@@ -20,7 +20,9 @@ def get_results(index_dict, prediction_indices, mongo_data):
     '''
     Used the mappingin index dictioanry to get the correct image numbers. It then uses the Mongodb dump to
     get recommendations's amazon url and image
+    
     Input: Index dictionary , Prediction indices recommended, and mongo dump as dictionary
+    
     Output: list of dictionaries containing image and prod links to recommended products
     '''
     results = []
@@ -51,8 +53,18 @@ def query_image_pipeline(
         k=10,
         filename="Query_picture.jpg"):
     """
-    Input: The url of the image provided by the user , the filename to store image as , no of predictions to be returned
-    Output:
+    Used to get results for the user query using featurization models.
+    Input: 
+    - The url of the image provided by the user 
+    - A dicitonary dump of mongodb data used to get metadata about predictions
+    - Fitted model for scaling data
+    - Fitted model for PCA
+    - Fitted model fro KNN
+    - Dictionary containing mapping of image numbers  and their row numbers in numpy data
+    - the number of neigbors to return from knn model
+    - The filename to store image as , no of predictions to be returned
+   
+    Output: recommendation to be sent to the user
 
     """
     # Save the image onto the system in the current working directory
@@ -60,7 +72,6 @@ def query_image_pipeline(
 
     # get the image features using the preprocess function from
     features = preprocess(filename)
-    print "Features here:??????????????", features.shape
     # Get the PCA model and Index dictionary from pkl file which should be in
     # the same folder as this
 

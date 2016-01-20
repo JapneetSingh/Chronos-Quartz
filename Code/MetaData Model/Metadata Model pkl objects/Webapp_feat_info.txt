@@ -1,7 +1,0 @@
-
-#Notes for featurization from the web app
-
-("Band width","millimeter")  >>>>>> Avg value for filling the nulls =22 millimeters
-("Case diameter","millimeter")>>>>>> Avg value for filling the nulls= 40 millimeters
-("Case Thickness","millimeter") >>>>>> Avg value for filling the nulls= 12 millimeters
-f('Water resistant depth','feet')>>>>>> Avg value for filling the nulls= 289 feet

@@ -118,7 +118,7 @@ def data_pca_pipeline(data):
     Output : Concatenated feature matrix
     """
     print "Starting PCA for edge and threshold"
-    data, var_exp = pca(data, 3500, 'Pca_Image_model.pkl', mayipickle=True)
+    data, var_exp = pca(data, 1500, 'Pca_Image_model.pkl', mayipickle=True)
     print "Cumulative sum of Variance explained per component is as follows:", var_exp.cumsum()
     print data
 

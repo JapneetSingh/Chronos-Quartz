@@ -13,7 +13,7 @@ app = Flask(__name__)
 mongo_data = read_mongodump("images.json")
 
 
-# Image based models
+# Uploading Image based models
 
 pca_model = unpickle("pickled_models/Image/2Pca_Image_model.pkl")
 scale_model = unpickle("pickled_models/Image/2SS_model.pkl")
@@ -21,12 +21,17 @@ knn_model = unpickle("pickled_models/Image/2knn_model.pkl")
 image_index_dict = unpickle("pickled_models/Image/2Image_model_Index_dict.pkl")
 
 
-# Metadata based models
 
-
-# Form page to submit text
+# Home page of the web app
 @app.route('/')
 def submission_page():
+	"""
+    Home page used to collect information
+    Input: None
+    Output: html code
+
+    """
+
     return '''
         <!DOCTYPE html>
 		<html>
@@ -46,24 +51,6 @@ def submission_page():
 
 		Url: <br>
 		<input type="text" name="url"value="http://ecx.images-amazon.com/images/I/91LfiWuBpKL._UY879_.jpg"><br><br>
-
-		Remaining inputs are all optional and are already filled with average values<br><br>
-
-		Description: <br>
-		<input type="text" name="desc" value=""><br><br>
-		Band Width(in mm): <br>
-		<input type="text" name="band_wid" value="22"><br><br>
-
-		Case Diameter(in mm): <br>
-		<input type="text" name="case_dia" value="40"><br><br>
-
-
-		Case Width(in mm): <br>
-		<input type="text" name="case_wid" value="12"><br><br>
-
-		Water Resistant Depth(in feet): <br>
-		<input type="text" name="wat_dr" value="289"><br><br>
-
 		<input type="submit" value="Submit">
 		</font>
 		</form>
@@ -72,9 +59,17 @@ def submission_page():
         '''
 
 
-# My word counter app
+# Results page of the app
 @app.route('/watch_recommendations', methods=['POST', 'GET'])
 def watch_recos():
+    """
+    Extracts the url from home page and displays the recommendations
+    Input: None
+    Output: html code
+
+    """
+
+
     image_path = str(request.form['url'])
     results = query_image_pipeline(
         image_path,
