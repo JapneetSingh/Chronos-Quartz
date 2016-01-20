@@ -7,9 +7,7 @@ from sklearn.preprocessing import StandardScaler
 import cPickle as pickle
 #import matplotlib.pyplot as plt
 
-# pCA
-
-
+# PCA
 def pca(
         data,
         n_components=100,
@@ -20,7 +18,8 @@ def pca(
     Since Standard scalar expects <=2 dimensions but colored images have 3 we will be
     convert them to gray if not gray already
 
-    Input: Gray image, number of components you wish to use, plot boolean to do the scree plot
+    Input: Gray image, number of components you wish to use, filename for pickled pca
+    object, plot boolean to do the scree plot, boolean for deciding to pickle object or not
 
     Output: Features from image
 
@@ -32,9 +31,9 @@ def pca(
 
     scale = StandardScaler()
     img_data_scaled = scale.fit_transform(data)
-    print ">>>>>>>>>>>before pca scaled>>>>>>", img_data_scaled
+    print "Scaling the data", img_data_scaled
     pickle_this(scale, "SS_model.pkl")
-
+    print "Performing PCA on scaled data"
     # features
     pca_model = PCA(n_components)
     pca_data = pca_model.fit_transform(img_data_scaled)
@@ -53,6 +52,7 @@ def pca(
 
 
 ############################# PCA helper- Not used currently #############
+# This function is not being used but useful to vidualize the contribution of each principal component
 def scree_plot(pca, title=None):
     '''
     Creates a plot of top 9 Principal Component and the variance explained by them
@@ -108,20 +108,19 @@ def scree_plot(pca, title=None):
     if title is not None:
         plt.title(title, fontsize=16)
 
-###########################Pipeline##################
+###########################Pipeline- helper fuction for Vectorize##################
 
 
 def data_pca_pipeline(data):
     """
     Create the final dataset to be modeled. Run Pca on them and then combine them
-    Input : Feature datasets of same number of rows.
-    Output : Concatenated feature matrix
+    Input : Feature dataset that is to undergo PCA
+    Output : Feature matrix after PCA
     """
     print "Starting PCA for edge and threshold"
     data, var_exp = pca(data, 1500, 'Pca_Image_model.pkl', mayipickle=True)
     print "Cumulative sum of Variance explained per component is as follows:", var_exp.cumsum()
-    print data
-
+    #print data
     return data
 
 ######################Vectorize function##############
@@ -129,7 +128,8 @@ def data_pca_pipeline(data):
 
 def vectorize(data_path, no_of_images, indicator):
     '''
-    Takes the path, total number of folders(not images coz folders may be empty) in path and creates vector matrix
+    Takes the path, total number of folders(not images coz folders may be empty)
+    in path and creates vector matrix. Generlly called in  Model.py file
     Input: Path to files, Total Images, print step(how many images till notification)
     Output: Final dataset to be used in modeling after PCA ,Index dictionary
     '''
@@ -175,14 +175,9 @@ def vectorize(data_path, no_of_images, indicator):
 
     return data, index_dict
 
-
-###################################
-
-
 if __name__ == "__main__":
 
     data_path = 'Data/'
-
-    data_color, data_thed, index_dict = vectorize(data_path, 5940, 250)
-
-    data = data_pipeline(data_color, data_thed)
+    #5940 is the total number of scraped images
+    data , index_dict = vectorize(data_path, 5940, 250)
+    data = data_pipeline(data)

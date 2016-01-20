@@ -1,5 +1,5 @@
 import matplotlib
-# matplotlib.use('Agg')
+#matplotlib.use('Agg') # must be uncommented for use on aws
 import os
 import cv2
 import numpy as np
@@ -12,7 +12,9 @@ import cPickle as pickle
 ####################Image Load,Display,Save#########################
 def destroy():
     '''
-    Destroy(close) all open image windows
+    Destroy(close) all open image windows from display
+    Input : None
+    Output: None
     '''
     cv2.destroyAllWindows()
 
@@ -43,6 +45,7 @@ def pickle_this(object, filename):
 
 def resize(image, hnew=300, interpolation=cv2.INTER_AREA, fixed_shape=True):
     '''
+    Resizes the image
     Input:  Image, The new height you wish to set, interpolation technique, fixed shape boolean to represent if you want
     Output: Resized image
     '''
@@ -67,17 +70,17 @@ def resize(image, hnew=300, interpolation=cv2.INTER_AREA, fixed_shape=True):
 
 def convert_to_gray(image):
     '''
-
+    Converts image to grayscale
     Input: Image
     Output: Image converted to gray scale
     '''
 
     return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-
+#This function was not used
 def convert_to_hsv(image):
     '''
-
+    Converts image to hsv.
     Input: Image
     Output: Image converted to hsv
     '''
@@ -87,22 +90,21 @@ def convert_to_hsv(image):
 
 def blur(grey_image, k=3):
     '''
-
+    Blur the image
     Input: gray image , kernal size to perform the blur(smaller the size lesser the blur)
     Output: Image blurred by Gaussian method
     '''
 
     return cv2.GaussianBlur(grey_image, (k, k), 0)
 
-# Edge Detection and Thresholding
-
+################## Edge Detection and Thresholding ####################
 
 def threshold(img_gray, k=7, C=4, plot=False):
     '''
 
     Input: gray image, k as convolution kernal(window) size,C a constant to be subtracted
     Default values for k,C were chosen based on manual tests performed on images
-    Output: Image undergone adaptive threshold process
+    Output: Image matrix undergone adaptive threshold process
     '''
     t_image = cv2.adaptiveThreshold(
         img_gray,
@@ -142,12 +144,11 @@ def cannyedgedetection(img_gray, t1=10, t2=180, plot=False):
 def masking(image, mask_type='c'):
     '''
 
-        Input: Image(can be color or gray), type of masking(c for circular and r for rectangular)
-        Output: Image undergone canny edge detection
-
-        For this project I have decided to go with cirular masks because they retain
-        more information about watch while removing the background noise
-        background
+    Used to generate a mask for images used in color extraction.
+    The circular mask covers the dial and
+    the rectangluar covers the band color with a part of dial
+    Input: Image(can be color or gray), type of masking(c for circular and r for rectangular)
+    Output: Image undergone canny edge detection
     '''
 
     # Width comes first when entering data to opencv
@@ -195,9 +196,10 @@ def bitwise_operations(image, mask):
 
 #########################Dominant color####################
 
-
+#This function was not used
 def grey_hist_feat(img_gray, mask=None):
     '''
+    Returns grey scale based features for gray scaled image
     Input: Gray image , mask if used
 
     Output: features list obtain by flattening the histgram
@@ -225,6 +227,7 @@ def grey_hist_feat(img_gray, mask=None):
 
 def col_hist_feat(image, mask=None, plot=False):
     '''
+    Returns RGB based features for color images
     Input: Image , mask if used, a boolean for whether to plot histogram or not
 
     Output: features list obtain by flattening the histgram
@@ -263,9 +266,11 @@ def col_hist_feat(image, mask=None, plot=False):
 
 def preprocess(image_path):
     """
+
     Takes in a single image, resizes it and featurizes it
     using various techniques(edge detection, thresholding and histograms)
-
+    Input: An image
+    Output: Returns a matric constituting derived from the image
     """
 
     # Read in the image and resize it
@@ -307,8 +312,6 @@ def preprocess(image_path):
 ##############################
 if __name__ == "__main__":
     image_path = (
-        "/Users/Iskandar/Desktop/WatchSeer/Data/479/479.jpg")  # Circular
-    # image = cv2.imread("/Users/Iskandar/Desktop/WatchSeer/testimages/32.jpg")#Rectangular
-    # print image.shape
+        "/Users/Iskandar/Desktop/WatchSeer/Data/479/479.jpg")
     destroy()
     features = preprocess(image_path)
